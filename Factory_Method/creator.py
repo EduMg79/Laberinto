@@ -1,4 +1,4 @@
-from Laberinto.juego import Habitación, Pared, Puerta, Laberinto, Bomba, Bicho, Agresivo, Perezoso, Boss, Norte, Sur, Este, Oeste
+from Juego_Laberinto.Laberinto.juego import Habitación, Pared, Puerta, Laberinto, Bomba, Bicho, Agresivo, Perezoso, Boss, Norte, Sur, Este, Oeste
 
 class Creator:
     def __init__(self):

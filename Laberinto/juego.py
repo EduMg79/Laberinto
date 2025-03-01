@@ -1,13 +1,10 @@
-from Factory_Method.creator import *
+from Juego_Laberinto.Factory_Method.creator import *
 class ElementoMapa:
-    def __init__(self,padre):
+    def __init__(self, padre=None):
         self.padre = padre
         pass
     
     def entrar(self):
-        pass
-
-    def entrar(self,alguien):
         pass
 
     def esBomba(self):
@@ -64,18 +61,18 @@ class Oeste(Orientacion):
         return unContenedor.oeste
     
 class Hoja(ElementoMapa):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, padre=None):
+        super().__init__(padre)  # Pasar 'padre' a la clase base
 
 class Decorator(Hoja):
-    def __init__(self,em):
-        super().__init__()
+    def __init__(self, em, padre=None):
+        super().__init__(padre)  # Pasar 'padre' a la clase base
         self.em = em
         pass
 
 class Bomba(Decorator):
-    def __init__(self,em):
-        super().__init__(em)
+    def __init__(self, em, padre=None):
+        super().__init__(em, padre)  # Pasar 'padre' a la clase base
         self.activa = False
     
     def entrar(self):
@@ -88,12 +85,12 @@ class Bomba(Decorator):
         return True
 
 class Bicho:
-    def __init__(self, modo, posicion):
+    def __init__(self, modo, posicion, padre=None):
         self.vidas = 5
         self.poder = 1
         self.modo = modo
         self.posicion = posicion
-        
+        self.padre = padre  # Pasar 'padre' en el constructor si es necesario
 
     def esAgresivo(self):
         return self.modo.esAgresivo()
@@ -127,8 +124,7 @@ class Modo:
         self.camina(unBicho)
 
     def camina(self, unBicho):
-        "self subclassResponsibility."
-        "definir un caminar predeterminado"
+        pass
 
     def esAgresivo(self):
         return False
@@ -159,7 +155,6 @@ class Boss(Modo):
 
     def esBoss(self):
         return True
-
 class Contenedor(ElementoMapa):
     def __init__(self):
         super().__init__()
@@ -175,19 +170,19 @@ class Contenedor(ElementoMapa):
 
     def agregarOrientacion(self, orientacion):
         self.orientaciones.append(orientacion)
-        
+
     def obtenerElementoOR(self, orientacion):
         return orientacion.obtenerElementoOR(self)
 
-    def ponerEnOr(self, orientacion, em):
-        orientacion.ponerElemento(em, self)
+    def ponerEnOr(self, em,orientacion):
+        orientacion.ponerElemento(em, self)  # Llamar al método ponerElemento de la clase orientacion
 
 class Pared(ElementoMapa):
     def __init__(self):
         super().__init__()
 
     def entrar(self):
-        print("¡Te has chocado con una pared")
+        print("¡Te has chocado con una pared!")
 
     def esPared(self):
         return True
@@ -199,7 +194,7 @@ class ParedBomba(Pared):
 
     def entrar(self):
         print("Te has chocado con una Pared Bomba")
-        
+
 class Puerta(ElementoMapa):
     def __init__(self, lado1, lado2):
         super().__init__()
@@ -223,16 +218,16 @@ class Puerta(ElementoMapa):
         return True
 
 class Habitación(Contenedor):
-    def __init__(self, num, norte, sur, este, oeste):
+    def __init__(self, num):
         super().__init__()
         self.num = num
-        self.norte = norte
-        self.sur = sur
-        self.este = este
-        self.oeste = oeste
-        
+        self.norte = None
+        self.sur = None
+        self.este = None
+        self.oeste = None
+
     def entrar(self):
-        print(f"Estás en una habitación{self.num}")
+        print(f"Estás en la habitación {self.num}")
 
     def esHabitacion(self):
         return True
@@ -251,7 +246,6 @@ class Laberinto(Contenedor):
         for hijo in self.hijos:
             if hijo.num == num:
                 return hijo
-
         return None
 
     def entrar(self):
@@ -259,7 +253,6 @@ class Laberinto(Contenedor):
 
     def esLaberinto(self):
         return True
-    
 
 class Juego:
     def __init__(self):
@@ -270,14 +263,12 @@ class Juego:
         self.bichos.append(bicho)
 
     def eliminar_bicho(self, bicho):
-        self.bichos.remove(bicho) 
-
-    """ def iniciar_juego(self):
-        print("¡Bienvenido al juego del laberinto!")
-        # Aquí puedes agregar la lógica para iniciar el juego """
+        self.bichos.remove(bicho)
 
     def crearLaberinto2Habitaciones(self):
         laberinto = Laberinto()
+        
+        # Crear habitaciones
         hab1 = Habitación(1)
         hab1.este = Pared()
         hab1.oeste = Pared()
@@ -288,53 +279,39 @@ class Juego:
         hab2.este = Pared()
         hab2.oeste = Pared()
 
+        # Crear puerta
         puerta = Puerta(hab1, hab2)
-        puerta.lado1 = hab1
-        puerta.lado2 = hab2
-
         hab1.sur = puerta
         hab2.norte = puerta
 
+        # Agregar habitaciones al laberinto
         laberinto.agregar_habitacion(hab1)
         laberinto.agregar_habitacion(hab2)
+
         return laberinto
 
-    def crearLaberinto2HabitacionesFM(self):
-        unFM = Creator()
-        laberinto = unFM.fabricarLaberinto()
-        hab1 = unFM.fabricarHabitacion(1)
-        hab2 = unFM.fabricarHabitacion(2)
-        puerta = unFM.fabricarPuerta()
-        hab1.lado1 = puerta
-        hab2.lado2 = puerta
-        hab1.sur = puerta
-        hab2.norte = puerta
-
-        laberinto.agregar_habitacion(hab1)
-        laberinto.agregar_habitacion(hab2)
-        return laberinto
-    
     def crearLaberinto2HabitacionesFM(self, unFM):
         laberinto = unFM.fabricarLaberinto()
         hab1 = unFM.fabricarHabitacion(1)
         hab2 = unFM.fabricarHabitacion(2)
         puerta = unFM.fabricarPuerta()
+        
+        # Asignar puertas y orientar
         hab1.lado1 = puerta
         hab2.lado2 = puerta
-
-        hab1.ponerEnOr(puerta, unFM.fabricarSur())
-        hab2.ponerEnOr(puerta, unFM.fabricarNorte())
+        hab1.sur = puerta
+        hab2.norte = puerta
 
         laberinto.agregar_habitacion(hab1)
         laberinto.agregar_habitacion(hab2)
         return laberinto
-        
     
     def crearLaberinto2HabitacionesFMD(self, creator):
         laberinto = creator.fabricarLaberinto()
         hab1 = creator.fabricarHabitacion(1)
         hab2 = creator.fabricarHabitacion(2)
 
+        # Crear y agregar bombas a las paredes
         pared1 = creator.fabricarPared()
         bomba1 = creator.fabricarBomba(pared1)
         hab1.este = bomba1
@@ -343,9 +320,8 @@ class Juego:
         bomba2 = creator.fabricarBomba(pared2)
         hab2.oeste = bomba2
 
+        # Crear puerta y asignar a las habitaciones
         puerta = creator.fabricarPuerta()
-        hab1.lado1 = puerta
-        hab2.lado2 = puerta
         hab1.sur = puerta
         hab2.norte = puerta
 
@@ -366,7 +342,7 @@ class Juego:
         hab3 = unFM.fabricarHabitacion(3)
         hab4 = unFM.fabricarHabitacion(4)
 
-        # Crear puertas y asignar lados
+        # Crear y asignar puertas
         puerta1 = unFM.fabricarPuerta()
         hab1.lado1 = puerta1
         hab2.lado2 = puerta1
@@ -380,7 +356,7 @@ class Juego:
         hab3.lado1 = puerta4
         hab4.lado2 = puerta4
 
-        # Colocar las puertas en las habitaciones
+        # Colocar puertas en las orientaciones
         hab1.ponerEnOr(sur, puerta1)
         hab2.ponerEnOr(norte, puerta1)
         hab1.ponerEnOr(este, puerta2)
@@ -404,7 +380,7 @@ class Juego:
         self.agregar_bicho(unFM.fabricarBichoPerezoso(hab4))
 
         return self.laberinto
-    
+
     def obtenerHabitacion(self, num):
         return self.laberinto.obtener_habitacion(num)
     
@@ -412,7 +388,10 @@ class Juego:
         laberinto = creator.fabricarLaberinto()
         hab1 = creator.fabricarHabitacion(1)
         bichoBoss = creator.fabricarBoss()
+        
+        # Agregar habitación y bicho Boss
         laberinto.agregar_habitacion(hab1)
         self.agregar_bicho(bichoBoss)
         bichoBoss.posicion = hab1
+        
         return laberinto
