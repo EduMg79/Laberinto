@@ -2,7 +2,7 @@
 
 En este repositorio tenemos la version **Python** del proyecto **Juego Laberinto** que hemos trabajado en clase con Smalltalk.
 
-![image](https://github.com/EduMg79/Laberinto/blob/main/Untitled.mdj)
+![Image](https://github.com/user-attachments/assets/e7ac8ae8-00a1-463a-868e-c6125958afd0)
 
 
 ##  Estructura del Proyecto
