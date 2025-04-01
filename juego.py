@@ -42,6 +42,32 @@ class Bomba(Decorador):
         else:
             self.em.entrar()
 
+class Ente:
+
+    def __init__(self):
+        self.vidas = None
+        self.poder = None
+        self.posicion = None
+        self.juego = None
+
+    def esAtacadoPor(self,alguien):
+        print(f"{self} es atacado por {alguien}")
+        self.vidas -= alguien.poder
+        print(f"Vidas: {self.vidas}")
+        if self.vidas <= 0:
+            self.heMuerto()
+
+    def estaVivo(self):
+        return self.vidas > 0
+    
+    def heMuerto(self):
+        pass
+
+    def __init__(self):
+        self.vidas = 5
+        self.poder = 1
+    def juego_clonar_laberinto(self):
+     return self.juego.clonar_laberinto()
 
 class Pared(ElementoMapa):
     #Equivale a la clase Pared de en Smalltalk que hereda de elementomapa.
@@ -166,7 +192,7 @@ class Perezoso(Modo):
 
  
 
-class Bicho:
+class Bicho(Ente):
   #Clase bicho de SmallTalk, se inicializa con vidas, poder, modo y posicion
   #Dependiendo del modo actua de una manera o de otra y sus atributos cambian
     def __init__(self):
@@ -179,10 +205,22 @@ class Bicho:
         # delega en el modo
         if self.modo:
             self.modo.actua(self)
+            
+    def atacar(self):
+       self.juego.buscar_personaje(self)
+    
+    def obtener_orientacion(self):
+        return self.posicion.obtener_orientacion()
+    
+    def he_muerto(self):
+       self.juego.terminar_bicho(self)
+
+    def buscar_tunel(self):
+       self.modo.buscar_tunel_bicho(self)
     
     def ini_agresivo(self):
         self.modo = Agresivo()
-        self.poder = 10
+        self.poder = 5
     
     def ini_perezoso(self):
         self.modo = Perezoso()
