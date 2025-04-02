@@ -9,14 +9,149 @@ class ElementoMapa:
     
     def es_pared(self):
         return False
-
-    
-    
    
     def entrar(self):
       
         raise NotImplementedError("")
 
+class Contenedor(ElementoMapa):
+      def __init__(self, num):
+        super().__init__()
+        self.hijos = []
+        self.forma = None
+        self.num = None
+
+      def agregar_hijo(self, un_em):
+       un_em.padre = self  
+       self.hijos.append(un_em)  
+
+      def agregar_orientacion(self, una_orientacion):
+          self.forma.agregar_orientacion(una_orientacion)
+
+      def eliminar_hijo(self, un_em):
+        if un_em in self.hijos:
+            self.hijos.remove(un_em)  
+        else:
+            print("No existe ese objeto")  
+
+      def entrar(self, alguien):
+        print(f"{alguien} está en {self}")  
+        alguien.posicion = self 
+        alguien.buscar_tunel() 
+
+      def ir_al_este(self, alguien):
+         self.forma.ir_al_este(alguien)
+    
+      def ir_al_oeste(self, alguien):
+         self.forma.ir_al_oeste(alguien)
+
+      def ir_al_norte(self, alguien):
+         self.forma.ir_al_norte(alguien)
+
+      def ir_al_sur(self, alguien):
+         self.forma.ir_al_sur(alguien)
+        
+      def obtener_elemento_or(self,una_orientacion):
+          return self.forma.obtener_elemento_or(una_orientacion)
+      
+      def obtener_orientacion(self):
+          return self.forma.obtener_orientacion()
+      def obtener_orientaciones(self):
+          return self.forma.obtener_orientaciones()
+      def poner_en_or(self,una_or,un_em):
+          self.forma.poner_en_or(una_or,un_em)
+
+      def recorrer(self, un_bloque):
+        un_bloque(self)  
+
+        for hijo in self.hijos:
+            hijo.recorrer(un_bloque)  # Recursión sobre los hijos
+
+        for orientacion in self.obtener_orientaciones():
+            orientacion.recorrer(un_bloque, self.forma)
+
+class Armario(Contenedor):
+
+    def __init__(self):
+        super().__init__()
+
+    def esArmario(self):
+        return True
+
+class Habitacion(Contenedor):
+   #Equivale a la clase Habitacion, que en Smalltalk heredaba de Contenedor
+   #Añadimos dos nuevos métodos para mostrar el resultado como sería en smalltalk y conectar para poder conectar dos habitaciones entre si
+    def __init__(self, num):
+        self.num = num
+        super().__init__()
+    
+    def es_habitacion(self):
+        return True
+    
+    def print_on(self, a_stream):
+        a_stream.write(f"Hab{self.num}") 
+
+    def conectar(self, direccion, elemento):
+       
+        setattr(self, direccion, elemento)
+   
+    def mostrar(self):
+        # Muestra las conexiones (puertas y paredes) de la habitación
+        print(f"Habitación {self.num}:")
+        print(f"  Norte: {self.norte.__class__.__name__ if self.norte else 'Ninguno'}")
+        print(f"  Sur: {self.sur.__class__.__name__ if self.sur else 'Ninguno'}")
+        print(f"  Este: {self.este.__class__.__name__ if self.este else 'Ninguno'}")
+        print(f"  Oeste: {self.oeste.__class__.__name__ if self.oeste else 'Ninguno'}")
+        print("--------------------")   
+  
+
+class Laberinto(Contenedor):
+    #Equivale a la clase Laberinto, que en Smalltalk era un Contenedor
+    #implementamos el metodo mostrar para ver como sería en smalltalk
+    #y agregamos el metodo conectar para poder conectar dos habitaciones entre si
+  
+    def __init__(self):
+        super().__init__()
+    
+    def abrir_puertas(self):
+       self.recorrer(lambda each: each.abrir() if each.es_puerta else None)
+
+    def cerrar_puertas(self):
+       self.recorrer(lambda each: each.cerrar() if each.es_puerta else None)
+
+    def agregar_habitacion(self, habitacion):
+        self.hijos.append(habitacion)
+
+    def eliminar_habitacion(self, una_habitacion):
+        if una_habitacion in self.hijos:
+            self.hijos.remove(una_habitacion)  
+        else:
+            print("No existe ese objeto habitación")  
+
+    def obtener_habitacion(self, num):
+        for hab in self.hijos:
+            if hab.num == num:
+                return hab
+        return None
+    
+    def entrar(self,alguien):
+        hab1 = self.obtener_habitacion(1)
+        if hab1:
+            hab1.entrar(alguien)
+
+    def es_laberinto(self):
+        return True
+    
+    def recorrer(self, un_bloque):
+        un_bloque(self)  
+
+        for hijo in self.hijos:
+            hijo.recorrer(un_bloque)  
+        
+    def mostrar(self):
+      
+        for habitacion in self.habitaciones:
+            habitacion.mostrar()    
 
 class Decorador(ElementoMapa):
   #Clase decorador de SmallTalk
@@ -42,32 +177,7 @@ class Bomba(Decorador):
         else:
             self.em.entrar()
 
-class Ente:
 
-    def __init__(self):
-        self.vidas = None
-        self.poder = None
-        self.posicion = None
-        self.juego = None
-
-    def esAtacadoPor(self,alguien):
-        print(f"{self} es atacado por {alguien}")
-        self.vidas -= alguien.poder
-        print(f"Vidas: {self.vidas}")
-        if self.vidas <= 0:
-            self.heMuerto()
-
-    def estaVivo(self):
-        return self.vidas > 0
-    
-    def heMuerto(self):
-        pass
-
-    def __init__(self):
-        self.vidas = 5
-        self.poder = 1
-    def juego_clonar_laberinto(self):
-     return self.juego.clonar_laberinto()
 
 class Pared(ElementoMapa):
     #Equivale a la clase Pared de en Smalltalk que hereda de elementomapa.
@@ -112,53 +222,10 @@ class Puerta(ElementoMapa):
             print("La puerta está cerrada")
 
 
-class Habitacion(ElementoMapa):
-   #Equivale a la clase Habitacion, que en Smalltalk heredaba de Contenedor
-   #Añadimos dos nuevos métodos para mostrar el resultado como sería en smalltalk y conectar para poder conectar dos habitaciones entre si
-    def __init__(self, num):
-        self.num = num
-        self.norte = None
-        self.sur = None
-        self.este = None
-        self.oeste = None
-    
-    def es_habitacion(self):
-        return True
-
-    def conectar(self, direccion, elemento):
-       
-        setattr(self, direccion, elemento)
    
-    def mostrar(self):
-        # Muestra las conexiones (puertas y paredes) de la habitación
-        print(f"Habitación {self.num}:")
-        print(f"  Norte: {self.norte.__class__.__name__ if self.norte else 'Ninguno'}")
-        print(f"  Sur: {self.sur.__class__.__name__ if self.sur else 'Ninguno'}")
-        print(f"  Este: {self.este.__class__.__name__ if self.este else 'Ninguno'}")
-        print(f"  Oeste: {self.oeste.__class__.__name__ if self.oeste else 'Ninguno'}")
-        print("--------------------")
 
-class Laberinto(ElementoMapa):
-    #Equivale a la clase Laberinto, que en Smalltalk era un Contenedor
-    #implementamos el metodo mostrar para ver como sería en smalltalk
-    #y agregamos el metodo conectar para poder conectar dos habitaciones entre si
-  
-    def __init__(self):
-        self.habitaciones = []
-    
-    def agregar_habitacion(self, habitacion):
-        self.habitaciones.append(habitacion)
-    
-    def obtener_habitacion(self, num):
-        return next((hab for hab in self.habitaciones if hab.num == num), None)
-    
-    def entrar(self):
-        
-        pass
-    def mostrar(self):
-      
-        for habitacion in self.habitaciones:
-            habitacion.mostrar()
+
+
 
 class Modo:
     #Equivale a la clase abstracta Modo en Smalltalk, actua sobre bicho
@@ -189,8 +256,70 @@ class Perezoso(Modo):
     #Perezoso es un modo de bicho
     def es_perezoso(self):
         return True
+    
 
- 
+class Ente:
+
+    def __init__(self):
+        self.vidas = None
+        self.poder = None
+        self.posicion = None
+        self.juego = None
+
+    def es_atacado_por(self,alguien):
+        print(f"{self} es atacado por {alguien}")
+        self.vidas -= alguien.poder
+        print(f"Vidas: {self.vidas}")
+        if self.vidas <= 0:
+            self.heMuerto()
+
+    def esta_vivo(self):
+        return self.vidas > 0
+    
+    def he_muerto(self):
+        pass
+
+    def __init__(self):
+        self.vidas = 5
+        self.poder = 1
+
+    def juego_clonar_laberinto(self):
+     return self.juego.clonar_laberinto()
+    
+
+class Personaje(Ente):
+
+    def __init__(self,nombre):
+        super().__init__()
+        self.vidas = 50
+        self.nombre = nombre
+        self.poder = 1
+
+    def atacar(self):
+        self.juego.buscar_bicho()
+        print(f"{self.nombre} ataca")
+
+    def he_muerto(self):
+       self.juego.muere_personaje()
+       print(f"{self.nombre} ha muerto")
+
+    def ir_al_este(self):
+        self.posicion.ir_al_este(self)
+    
+    
+    def ir_al_oeste(self):
+        self.posicion.ir_al_oeste(self)
+    
+        
+    def ir_al_sur(self):
+        self.posicion.ir_al_sur(self)
+
+    def ir_al_norte(self):
+     self.posicion.ir_al_norte(self)
+    
+    def crear_nuevo_laberinto(self, un_tunel):
+      un_tunel.crear_nuevo_laberinto(self)
+
 
 class Bicho(Ente):
   #Clase bicho de SmallTalk, se inicializa con vidas, poder, modo y posicion
@@ -208,6 +337,7 @@ class Bicho(Ente):
             
     def atacar(self):
        self.juego.buscar_personaje(self)
+       print(f" bicho ataca")
     
     def obtener_orientacion(self):
         return self.posicion.obtener_orientacion()
