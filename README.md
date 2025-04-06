@@ -83,7 +83,7 @@ Las clases del juego son:
 
 ---
 
-## Ejecuccion del programa
+## Ejecucion del programa
 
 - He incluido un archivo `main.py` para poder ejecutar el programa y ver los resultados de forma similar al Playground de Smalltalk.
 - Para ello hemos utilizados los diferentes métodos de la clase `Juego` para poder crear diferentes tipos de laberintos.
