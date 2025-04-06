@@ -153,14 +153,29 @@ class Laberinto(Contenedor):
         for habitacion in self.habitaciones:
             habitacion.mostrar()    
 
-class Decorador(ElementoMapa):
+
+
+class Hoja(ElementoMapa):
+   def __init__(self):
+        super().__init__()
+
+   def entrar(self):
+     self.em.entrar()
+
+   def es_tunel(self):
+      return False
+    
+
+
+
+
+class Decorador(Hoja):
   #Clase decorador de SmallTalk
   #pasamos un elemento como parametro
     def __init__(self, em):
         self.em = em
     
-    def entrar(self):
-        self.em.entrar()
+  
 
 
 class Bomba(Decorador):
@@ -171,11 +186,29 @@ class Bomba(Decorador):
         super().__init__(em)
         self.activa = False
     
-    def entrar(self):
+    def entrar(self,alguien):
         if self.activa:
-            print("Te has chocado con una bomba")
+            print({alguien},"Se ha chocado con una bomba")
         else:
-            self.em.entrar()
+            self.em.entrar(alguien)
+
+    def es_bomba(self):
+        return True
+    
+
+class Tunel(Hoja):
+   def __init__(self):
+        super().__init__()
+
+   def es_tunel(self):
+      return True
+   
+   def entrar(self,alguien):
+      if self.laberinto is None:
+         alguien.crear_nuevo_laberinto(self)
+      else:
+         print({alguien},"Crea un nuevo laberinto")
+         self.laberinto.entrar(alguien)
 
 
 
