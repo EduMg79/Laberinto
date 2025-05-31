@@ -1339,6 +1339,9 @@ class Creator:
         bicho.vida = 1
         bicho.poder = 1
 
+    def fabricarForma(self):
+        return Forma()
+    
     def fabricarBomba(self):
         return Bomba()
     
@@ -1357,6 +1360,7 @@ class Creator:
     def fabricarHabitacion(self, unNum):
         hab = Habitacion()
         hab.num= unNum
+        hab.forma = self.fabricarForma()
         hab.agregarOrientacion(self.fabricarEste())
         hab.agregarOrientacion(self.fabricarOeste())
         hab.agregarOrientacion(self.fabricarNorte())
@@ -1376,6 +1380,16 @@ class Creator:
     
     def fabricarLaberinto(self):
         return Laberinto()
+    
+    def fabricarNorte(self):
+        return Norte()
+    def fabricarSur(self):  
+        return Sur()
+    def fabricarEste(self):
+        return Este()
+    def fabricarOeste(self):
+        return Oeste()
+    
 
 class CreatorB(Creator):
    

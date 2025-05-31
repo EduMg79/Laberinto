@@ -7,8 +7,8 @@ class LaberintoTest(TestCase):
     def setUp(self):
         super().setUp()
         self.juego = Juego()
-        fm = Creator()
-        self.juego.crearLaberinto2HabitacionesFM(fm)
+        self.fm = Creator()
+        self.juego.crearLaberinto2HabitacionesFM(self.fm)
 
     def testHabitaciones(self):
         norte = self.fm.fabricarNorte()
