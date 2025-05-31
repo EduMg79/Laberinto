@@ -1,4 +1,6 @@
 import random
+import json
+
 
 class Point:
     def __init__(self, x, y):
@@ -27,69 +29,152 @@ class Entrar(Comando):
 
 class ElementoMapa:
     def __init__(self):
-        self.padre = None
-    
-    def recorrer(self, func):
-        func(self)
+        self.comandos = []
+
+    def entrar(self):
+        pass
 
     def entrar(self, alguien):
         pass
 
-    def esPuerta(self):
-        return False
+    def esArmario(self):
+        pass
 
+    def esBomba(self):
+        pass
+
+    def esHabitacion(self):
+        pass
+
+    def esLaberinto(self):
+        pass
+
+    def esPared(self):
+        pass
+
+    def esPuerta(self):
+        pass
+
+    def recorrer(self, unBloque):
+        unBloque(self)
+
+    def __str__(self):
+        return "ElementoMapa"
+    
     def aceptar(self, unVisitor):
         pass
 
-    def calcularPosicionDesde(self,forma):
+    def agregarComando(self, unComando):
+        self.comandos.append(unComando)
+
+    def calcularPosicionDesdeEn(self, unaForma, unPunto):
         pass
-    def calcularPosicion(self):
-        pass
-    def calcularPosicionDesdeEn(self,forma, punto):
-        pass
-    def __str__(self):
-        return "Soy un ElementoMapa"
+    
+    def eliminarComando(self, unComando):
+        try:
+            self.comandos.remove(unComando)
+        except ValueError:
+            print("No existe ese comando")
+
+    def obtenerComandos(self):
+        return self.comandos
     
 
 class Contenedor(ElementoMapa):
     def __init__(self):
         super().__init__()
         self.hijos = []
-        self.forma = None
 
-    def agregar_hijo(self, hijo):
-        hijo.padre = self
-        self.hijos.append(hijo)
 
-    def eliminar_hijo(self, hijo):
-        self.hijos.remove(hijo)
-
-    def agregarOrientacion(self, orientacion):
-        self.forma.agregarOrientacion(orientacion)
-
-    def eliminarOrientacion(self, orientacion):
-        self.forma.eliminarOrientacion(orientacion)
-
-    def ponerElementoEnOrientacion(self, elemento, orientacion):
-        self.forma.ponerElementoEnOrientacion(elemento, orientacion)
-
-    def recorrer(self, func):
-        func(self)
-        for hijo in self.hijos:
-            hijo.recorrer(func)
-        self.forma.recorrer(func)
-
-    def obtenerElementoEnOrientacion(self, orientacion):
-        return self.forma.obtenerElementoEnOrientacion(orientacion)
+    def getextent(self):
+        return self.forma.extent
     
-    def caminarAleatorio(self, bicho):
-        self.forma.caminarAleatorio(bicho)
+    def setextent(self, unPunto):
+        self.forma.extent = unPunto
 
+    def getpunto(self):
+        return self.forma.punto
+    
+    def setpunto(self, unPunto):
+        self.forma.punto = unPunto
+
+    def agregarHijo(self, unEM):
+        unEM.padre = self
+        self.hijos.append(unEM)
+
+    def agregarOrientacion(self, unaOr):
+        self.forma.agregarOrientacion(unaOr)
+
+    def eliminarHijo(self, unEM):
+        try:
+            self.hijos.remove(unEM)
+
+        except ValueError:
+            print(f"No existe ese objeto hijo")
+
+    def entrar(self,alguien):
+        alguien.posicion = self
+        print(f"{alguien} ha entrado en {self}")
+        alguien.buscarTunel()
+    
+    def irAlEste(self,alguien):
+        self.forma.irAlEste(alguien)
+
+    def irAlOeste(self,alguien):
+        self.forma.irAlOeste(alguien)
+
+    def irAlNorte(self,alguien):
+        self.forma.irAlNorte(alguien)
+
+    def irAlSur(self,alguien):
+        self.forma.irAlSur(alguien)
+
+    def irAlNoroeste(self, alguien):
+        self.forma.irAlNoroeste(alguien)
+
+    def irAlNoreste(self, alguien):
+        self.forma.irAlNoreste(alguien)
+
+    def irAlSuroeste(self, alguien):
+        self.forma.irAlSuroeste(alguien)
+
+    def irAlSureste(self, alguien):
+        self.forma.irAlSureste(alguien)
+
+    def obtenerElementoOr(self,unaOr):
+        return self.forma.obtenerElementoOr(unaOr)
+    
+    def obtenerOrientacion(self):
+        return self.forma.obtenerOrientacion()
+    
+    def obtenerOrientaciones(self):
+        return self.forma.obtenerOrientaciones()
+
+    def ponerEnOr(self, unaOr, unEM):
+        self.forma.ponerEnOr(unaOr, unEM)
+
+    def recorrer(self, unBloque):
+        unBloque(self)
+
+        for each in self.hijos:
+            each.recorrer(unBloque)
+
+        for each in self.obtenerOrientaciones():
+            each.recorrer(unBloque, self.forma)
+
+    def __str__(self):
+        return "Contenedor"
+    
     def aceptar(self, unVisitor):
         self.visitarContenedor(unVisitor)
-        for hijo in self.hijos:
-            hijo.aceptar(unVisitor)
-        self.forma.aceptar(unVisitor)
+        for each in self.hijos:
+            each.aceptar(unVisitor)
+
+    def calcularPosicion(self):
+        self.forma.calcularPosicion()
+
+    def visitarContenedor(self, unVisitor):
+        pass
 
 class Armario(Contenedor):
 
@@ -100,76 +185,72 @@ class Armario(Contenedor):
         return True
 
 class Habitacion(Contenedor):
-    def __init__(self, num):
+
+    def __init__(self):
         super().__init__()
-        self.num = num
+        self.num = None
+        
+    
+    def esHabitacion(self):
+        return True
 
-    def entrar(self, alguien):
-        print(f"Entrando en la habitación {self.num}")
-        alguien.posicion=self
-
-    def visitarContenedor(self, unVisitor):
-        unVisitor.visitarHabitacion(self)
-    def calcularPosicion(self):
-        self.forma.calcularPosicion()
     def __str__(self):
-        return "Soy una habitacion"
-
-    def conectar(self, direccion, elemento):
-       
-        setattr(self, direccion, elemento)
-   
-    def mostrar(self):
-        # Muestra las conexiones (puertas y paredes) de la habitación
-        print(f"Habitación {self.num}:")
-        print(f"  Norte: {self.norte.__class__.__name__ if self.norte else 'Ninguno'}")
-        print(f"  Sur: {self.sur.__class__.__name__ if self.sur else 'Ninguno'}")
-        print(f"  Este: {self.este.__class__.__name__ if self.este else 'Ninguno'}")
-        print(f"  Oeste: {self.oeste.__class__.__name__ if self.oeste else 'Ninguno'}")
+        return f"Habitacion {self.num}"
+    
+    def visitarContenedor(self, unVisitor):
+        unVisitor.visitarContenedor(self)
         print("--------------------")   
   
 
 class Laberinto(Contenedor):
     def __init__(self):
-        super().__init__()        
+        super().__init__()
+
+    def abrirPuertas(self):
+        self.recorrer(lambda each: each.abrir() if each.esPuerta() and not each.estaAbierta() else None)
+        print("Todas las puertas han sido abiertas")
+
+    def aceptar(self, unVisitor):
+        for each in self.hijos:
+            each.aceptar(unVisitor)
+
+    def cerrarPuertas(self):
+        self.recorrer(lambda each: each.cerrar() if each.esPuerta() and each.estaAbierta() else None)
 
     def entrar(self,alguien):
-        print("Entrando en el laberinto")
-        hab1=self.obtenerHabitacion(1)
+        hab1 = self.obtenerHabitacion(1)
         hab1.entrar(alguien)
+        return "Entraste en un  laberinto"
+    
+    def esLaberinto(self):
+        return True
+    
+    def agregarHabitacion(self, unaHabitacion):
+        self.hijos.append(unaHabitacion)
 
-    def __str__(self):
-        return "Soy un laberinto"
+    def eliminarHabitacion(self, unaHabitacion):
+        try:
+            self.hijos.remove(unaHabitacion)
 
-    def agregarHabitacion(self, habitacion):
-        self.hijos.append(habitacion)
+        except ValueError:
+            print(f"No existen las  habitaciones")
 
-    def obtenerHabitacion(self, num):
+    def obtenerHabitacion(self, unNum):
         for habitacion in self.hijos:
-            if habitacion.num == num:
+            if habitacion.num == unNum:
                 return habitacion
         return None
     
-    def recorrer(self, func):
-        func(self)
+    def recorrer(self, unBloque):
+        unBloque(self)
         for hijo in self.hijos:
-            hijo.recorrer(func)
+            hijo.recorrer(unBloque)
 
-    def entrar(self, alguien):        
-        hab1=self.obtenerHabitacion(1)
-        hab1.entrar(alguien)
-        print(f"{alguien} entra en el laberinto")
-    
-    def aceptar(self, unVisitor):
-        #unVisitor.visitarContenedor(self)
-        for hijo in self.hijos:
-            hijo.aceptar(unVisitor)
-        #self.forma.aceptar(unVisitor)
-        
-    def mostrar(self):
-      
-        for habitacion in self.habitaciones:
-            habitacion.mostrar()    
+    def printOn(self, aStream):
+        print(f"{aStream} Laberinto")
+
+    def __str__(self):
+        return "Laberinto"
 
 
 
@@ -181,156 +262,167 @@ class Hoja(ElementoMapa):
 
 
 class Decorator(Hoja):
-    def __init__(self, em):
-        super().__init__()
-        self.em = em
+        
+        def __init__(self):
+            super().__init__()
+            self.em = None
 
-    def __str__(self):
-        return "Soy un decorator"
+        def __str__(self):
+            return f"Decorator"
+        
   
 
 
 class Bomba(Decorator):
-    def __init__(self, em):
-        super().__init__(em)
-        self.activa = False
+
+    def entrar(self,alguien):
+        if self.activa:
+            print(f"{alguien} ha pisao una bomba")
+        else:
+            self.em.entrar(alguien)
 
     def esBomba(self):
         return True
+    
+    def esTunel(self):
+        return False
 
+    def __init__(self):
+        super().__init__()
+        self.activa = False
+
+    def __str__(self):
+        return f"Bomba {self.activa}"
+    
     def aceptar(self, unVisitor):
         unVisitor.visitarBomba(self)
-    
-    def __str__(self):
-        return "Soy una bomba"
-    
+
+    def activar(self):
+        self.activa = True
+        print("Bomba activada")
 
 
 class Tunel(Hoja):
-    def __init__(self, laberinto):
-        super().__init__()
-        self.laberinto = None
 
-    def puedeClonarLaberinto(self,alguien):
-        self.laberinto = alguien.juego.clonarLaberinto()
-        self.laberinto.entrar(self)
-
+    def esTunel(self):
+        return True
+    
     def aceptar(self, unVisitor):
         unVisitor.visitarTunel(self)
 
-    def entrar(self, alguien):
-        if self.laberinto is None:
-            alguien.clonarLaberinto(self)            
-        else:
-            self.laberinto.entrar(alguien)
+    def crearNuevoLaberinto(self, alguien):
+        self.laberinto = alguien.juegoClonaLaberinto()
+        print(f"{alguien} crea un nuevo laberinto")
 
 
 
 class Pared(ElementoMapa):
-    def __init__(self):
-        super().__init__()
-
+    
     def entrar(self,alguien):
-        print("chocando en una pared")
+         print(f"{alguien} se ha chocado con una pared")
+
+    def esPared(self):
+        return True
 
     def __str__(self):
-        return "Soy una pared"
+        return "Pared"
 
 
 class ParedBomba(Pared):
+
     def __init__(self):
         super().__init__()
         self.activa = False
-
-    def entrar(self):
-        print("Entrando en una pared bomba")
 
     def __str__(self):
         return "Soy una pared bomba"
 
 
 class Puerta(ElementoMapa):
-    def __init__(self, lado1, lado2):
-        self.lado1 = lado1
-        self.lado2 = lado2
-        self.visitada = False
-        self.estadoPuerta = Cerrada()
+
+    def abrir(self):
+        self.estado.abrir(self)
+        print(f"{self} ha sido abierta.")
+
+    def cerrar(self):
+        self.estado.cerrar(self)
+        print(f"{self} ha sido cerrada.")
 
     def entrar(self, alguien):
-        self.estadoPuerta.entrar(self, alguien)
+        self.estado.entrar(alguien,self)
+
+    def esPuerta(self):
+        return True
+
+    def __init__(self):
+        super().__init__()
+        self.estado = Cerrada()
+        self.visitada = False
+
+    def estaAbierta(self):
+        return self.estado.estaAbierta()
+    
+    def calcularPosicionDesde(self, unCont, unPunto):
+        if getattr(self, 'visitada', False):
+            return self
+        self.visitada = True
+
+        if unCont.num == self.lado1.num:
+            self.lado2.punto = unPunto
+            self.lado2.calcularPosicion()
+        else:
+            self.lado1.punto = unPunto
+            self.lado1.calcularPosicion()
 
     def puedeEntrar(self, alguien):
-        print("Entrando en una puerta")
         if alguien.posicion == self.lado1:
             self.lado2.entrar(alguien)
         else:
             self.lado1.entrar(alguien)
-
-    def abrir(self):
-        print("Abriendo puerta")
-        self.estadoPuerta.abrir(self)
-
-    def cerrar(self):
-        print("Cerrando puerta")
-        self.estadoPuerta.cerrar(self)
-
-    def esPuerta(self):
-        return True
-    
-    def aceptar(self, unVisitor):
-        unVisitor.visitarPuerta(self)
-
-    def calcularPosicionDesdeEn(self,forma, punto):
-        print("punto: ", punto.x, punto.y)
-        if self.visitada:
-            return
-        self.visitada = True
-        if self.lado1.num == forma.num:
-            self.lado2.forma.punto=punto
-            self.lado2.calcularPosicion()
-        else:
-            self.lado1.forma.punto=punto
-            self.lado1.calcularPosicion()
     
     def __str__(self):
-        return "Soy una puerta"
-
+        return f"Puerta - {self.lado1.num} - {self.lado2.num} - {self.estado}"
 
 class Ente:
     def __init__(self):
         self.vidas = None
         self.poder = None
-        self.posicion = None
-        self.juego = None
         self.estadoEnte = Vivo()
 
-    def clonarLaberinto(self,tunel):
-        pass
-
-    def esAtacadoPor(self, atacante):
-        print(f"Ataque: {self}  es atacado")
-        self.vidas -= atacante.poder
-        print(f"Vidas restantes: {self.vidas}")
+    def esAtacadoPor(self,alguien):
+        print(f"{self} es atacado por {alguien}")
+        self.vidas -= alguien.poder
+        print(f"Vidas: {self.vidas}")
         if self.vidas <= 0:
-            print(f"El ente ha muerto")
-            self.estadoEnte.morir(self)
+            self.heMuerto()
 
-class Personaje(Ente):
-    def __init__(self, vidas, poder, juego, nombre):
-        super().__init__()
-        self.nombre = nombre
-        self.vidas = vidas
-        self.juego = juego
-
-    def clonarLaberinto(self,tunel):
-        tunel.puedeClonarLaberinto()
-
-    def atacar(self):
-        self.juego.buscarBicho()
+    def estaVivo(self):
+        return self.vidas > 0
+    
+    def heMuerto(self):
+        self.estadoEnte = Muerto()
+        self.avisar()
 
     def __str__(self):
-        return self.nombre
+        return "Ente"
     
+    def atacar(self):
+        self.estadoEnte.atacar(self)
+
+    def avisar(self):
+        pass
+
+    def buscarTunel(self):
+        pass
+
+    def crearNuevoLaberinto(self):
+        pass
+
+    def juegoClonaLaberinto(self):
+        return self.juego.clonarLaberinto()
+    
+    def puedeAtacar(self):
+        pass
 
 class Arma:
  def usar(self, personaje):
@@ -358,7 +450,6 @@ class PocionVida(Arma):
 class Bicho(Ente):
     def __init__(self):
         self.modo = None
-        self.running = True
         self.poder = None
         self.vidas = None
         self.posicion = None
@@ -367,12 +458,12 @@ class Bicho(Ente):
         while self.estaVivo():
             self.modo.actuar(self)
 
-    def iniAgresivo(self):
+    def ini_agresivo(self):
         self.modo = Agresivo()
         self.poder = 10
         self.vidas = 5
 
-    def iniPerezoso(self):
+    def ini_perezoso(self):
         self.poder = 1
         self.vidas = 5
 
@@ -380,9 +471,18 @@ class Bicho(Ente):
         self.juego.buscarPersonaje(self)
     def caminar(self):
         self.posicion.caminarAleatorio(self)
+    
+    def avisar(self):
+        self.juego.terminarBicho(self)
 
-    def estaVivo(self):
-        return self.vidas > 0
+    def buscarTunel(self):
+        self.modo.buscarTunelBicho(self)
+        
+    def puedeActuar(self):
+        self.modo.actua(self)
+
+    def puedeAtacar(self):
+        self.juego.buscarPersonaje(self)
 
     def __str__(self):
         return "Soy un bicho"+self.modo.__str__()
@@ -402,12 +502,13 @@ class Vivo(EstadoEnte):
     def __init__(self):
         super().__init__()
 
-    def vivir(self, ente):
-        print("El ente ya está vivo")
+    def actua(self, unBicho):
+     unBicho.puedeActuar()
 
-    def morir(self, ente):
-        print("El ente muere")
-        ente.estadoEnte = Muerto()
+    def atacar(self, alguien):
+        alguien.puedeAtacar()
+
+   
 
 
 class Muerto(EstadoEnte):
@@ -437,83 +538,117 @@ class EstadoPuerta:
 
 
 class Abierta(EstadoPuerta):
-    def __init__(self):
-        super().__init__()
 
-    def abrir(self, puerta):
-        print("La puerta ya está abierta")
+    def abrir(self, unaPuerta):
+        "ya abierta"
 
-    def cerrar(self, puerta):
-        print("Cerrando la puerta")
-        puerta.estadoPuerta = Cerrada()
+    def cerrar(self, unaPuerta):
+        unaPuerta.estado = Cerrada()
+        print(f"{unaPuerta} se ha cerrado")
 
-    def entrar(self, puerta, alguien):
-        puerta.puedeEntrar(alguien)
+    def entrar(self, alguien, unaPuerta):
+        unaPuerta.puedeEntrar(alguien)
 
+
+    def estaAbierta(self):
+        return True
+    
+    def __str__(self):
+        return "Abierta"
 
 class Cerrada(EstadoPuerta):
-    def __init__(self):
-        super().__init__()
+     def abrir(self, unaPuerta):
+       
+        unaPuerta.estado = Abierta()
+        print(f"{unaPuerta} se ha abierto")
 
-    def abrir(self, puerta):
-        print("Abriendo la puerta")
-        puerta.estadoPuerta = Abierta()
+     def cerrar(self, unaPuerta):
+        "ya cerrada"
 
-    def cerrar(self, puerta):
-        print("La puerta ya está cerrada")
+     def estaAbierta(self):
+        return False
 
-    def entrar(self, puerta, alguien):
-        pass
+     def entrar(self, alguien, unaPuerta):
+        print(f"{alguien} ha chocado con una puerta")
+
+     def __str__(self):
+        return "Cerrada"
 
 
 class Forma:
     def __init__(self):
         self.orientaciones = []
-        self.num=None
-        self.punto=None
-        self.extent=Point(0,0)
 
-    def agregarOrientacion(self, orientacion):
-        self.orientaciones.append(orientacion)
+    def agregarOrientacion(self, unaOr):
+        self.orientaciones.append(unaOr)
 
-    def eliminarOrientacion(self, orientacion):
-        self.orientaciones.remove(orientacion)
+    def __init__(self):
+        self.orientaciones = []
 
-    def ponerElementoEnOrientacion(self, elemento, orientacion):
-        orientacion.poner(elemento, self)
+    def irAlEste(self, alguien):
+        pass
 
-    def obtenerElementoEnOrientacion(self, orientacion):
-        return orientacion.obtenerElemento(self)
+    def irAlOeste(self, alguien):
+        pass
 
-    def recorrer(self, func):
-        for orientacion in self.orientaciones:
-            orientacion.recorrer(func, self)
+    def irAlNorte(self, alguien):
+        pass
+
+    def irAlSur(self, alguien):
+        pass
+
+    def obtenerElementoOr(self, unaOr):
+        return unaOr.obtenerElementoOrEn(self)
+    
+    def obtenerOrientacion(self):
+        ind = random.randint(0, len(self.orientaciones)-1)
+        return self.orientaciones[ind]
+    
+    def obtenerOrientaciones(self):
+        return self.orientaciones
+    
+    def ponerEnOr(self, unaOr, unEM):
+        unaOr.ponerElemento(unEM, self)
+    
+    def __str__(self):
+        return "Forma"
+    
     def calcularPosicion(self):
-        for orientacion in self.orientaciones:
-            orientacion.calcularPosicionDesde(self)
-    def caminarAleatorio(self, bicho):
-        orientacion=self.obtenerOrientacionAleatoria()
-        print(f"Orientacion aleatoria: {orientacion}")
-        orientacion.caminarAleatorio(bicho, self)
+        for orientation in self.obtenerOrientaciones():
+            orientation.calcularPosicionDesde(self)
 
-    def obtenerOrientacionAleatoria(self):
-        return random.choice(self.orientaciones)
-
-    def aceptar(self, unVisitor):
-        for orientacion in self.orientaciones:
-            orientacion.aceptar(unVisitor, self)   
 
 
 class Cuadrado(Forma):
     def __init__(self):
         super().__init__()
-        self.norte = None
-        self.sur = None
+        self.norte = None 
         self.este = None
+        self.sur = None
         self.oeste = None
-        self.orientaciones = []
 
+    def irAlEste(self, unEnte):
+        self.este.entrar(unEnte)
 
+    def irAlNorte(self, unEnte):
+        self.norte.entrar(unEnte)
+
+    def irAlOeste(self, unEnte):
+        self.oeste.entrar(unEnte)
+
+    def irAlSur(self, unEnte):
+        self.sur.entrar(unEnte)
+
+    def __str__(self):
+        return f"Cuadrado"
+    
+class Rombo(Forma):
+    def __init__(self):
+        super().__init__()
+        self.noreste = None
+        self.noroeste = None
+        self.sureste = None
+        self.suroeste = None
 
 
 
@@ -540,29 +675,72 @@ class Modo:
 
 import time
 class Agresivo(Modo):
+       
+    def buscarTunelBicho(self, unBicho):
+        pos = unBicho.posicion
+        tunel = next((each for each in pos.hijos if each.esTunel()), None)
+        if tunel is not None:
+            tunel.entrar(unBicho)
+
+    def dormir(self, unBicho):
+        print(f"{unBicho} duerme")
+        time.sleep(1)
+
     def __init__(self):
         super().__init__()
 
-    def dormir(self, bicho):
-        print("Agresivo: Durmiendo un poco...")
-        time.sleep(1)
-
+    def esAgresivo(self):
+        return True
+    
     def __str__(self):
-        return "-agresivo"
+        return "Agresivo"
 
  
 
 class Perezoso(Modo):
+
+    def buscarTunelBicho(self, unBicho):
+        pos = unBicho.posicion
+        tunel = next((each for each in pos.hijos if each.esTunel()), None)
+        if tunel is not None:
+            tunel.entrar(unBicho)
+
+    def dormir(self, unBicho):
+        print(f"{unBicho} duerme")
+        time.sleep(3)
+
     def __init__(self):
         super().__init__()
 
-    def dormir(self, bicho):
-        print("Perezoso: Zzzzz...")
-        time.sleep(3)
+    def esPerezoso(self):
+        return True
+    
+    def __str__(self):
+        return "Perezoso"
+    
+class BichoBoss(Modo):
+    def __init__(self):
+        super().__init__()
+        self.modo = Agresivo()  # O el modo que prefieras
+        self.vidas = 200
+        self.poder = 10
+    def buscarTunelBicho(self, unBicho):
+        pos = unBicho.posicion
+        tunel = next((each for each in pos.hijos if each.esTunel()), None)
+        if tunel is not None:
+            tunel.entrar(unBicho)
+
+    def esBoss(self):
+        return True
+    
+    def avisar(self):
+        # Cuando el boss muere, el personaje gana la partida
+        print("¡Has derrotado al BOSS!")
+        if hasattr(self, 'juego'):
+            self.juego.ganaPersonaje()
 
     def __str__(self):
-        return "-perezoso"
-    
+        return "Boss"
 
 class Juego:
 
@@ -762,6 +940,8 @@ class Juego:
 
         if bicho is None and self.person.estaVivo():
             self.ganaPersonaje()
+        else:
+            print("Aun hay bichos vivos")
 
     def ganaPersonaje(self):
         print(f"Fin del juego, {self.person} ha ganado")
@@ -811,58 +991,68 @@ class Juego:
 
 class Personaje(Ente):
 
-    def __init__(self,nombre):
+    def __init__(self,unaCadena):
         super().__init__()
-        self.vidas = 50
-        self.nombre = nombre
-        self.poder = 1
+        self.vidas = 1000
+        self.nombre = unaCadena
 
-    def atacar(self):
-        self.juego.buscar_bicho()
-        print(f"{self.nombre} ataca")
+    def puedeAtacar(self):
+        self.juego.buscarBicho()
 
-    def he_muerto(self):
-       self.juego.muere_personaje()
-       print(f"{self.nombre} ha muerto")
+    def irAlEste(self):
+        self.posicion.irAlEste(self)
 
-    def ir_al_este(self):
-        self.posicion.ir_al_este(self)
+    def irAlNorte(self):
+        self.posicion.irAlNorte(self)
+
+    def irAlOeste(self):
+        self.posicion.irAlOeste(self)
     
+    def irAlSur(self):
+        self.posicion.irAlSur(self)
+
+    def irAlNoroeste(self):
+        self.posicion.irAlNoroeste(self)
+
+    def irAlNoreste(self):
+        self.posicion.irAlNoreste(self)
+
+    def irAlSuroeste(self):
+        self.posicion.irAlSuroeste(self)
     
-    def ir_al_oeste(self):
-        self.posicion.ir_al_oeste(self)
-    
-        
-    def ir_al_sur(self):
-        self.posicion.ir_al_sur(self)
+    def irAlSureste(self):
+        self.posicion.irAlSureste(self)
 
-    def ir_al_norte(self):
-     self.posicion.ir_al_norte(self)
-    
-    def crear_nuevo_laberinto(self, un_tunel):
-      un_tunel.crear_nuevo_laberinto(self)
+    def avisar(self):
+        self.juego.muerePersonaje()
 
-class Orientacion:
-    def __init__(self):
-        pass
+    def crearNuevoLaberinto(self,unTunel):
+        unTunel.crearNuevoLaberinto(self)
 
-    def poner(self, elemento, contenedor):
-        pass
-
-    def recorrer(self, func, forma):
-        raise NotImplementedError
+    def obtenerComandos(self):
+        lista = []
+        self.posicion.recorrer(lambda each: lista.extend(each.obtenerComandos()))
+        return lista
 
     def __str__(self):
-        return "Soy una orientacion"
+        return f"Personaje {self.nombre}"
 
-    def obtenerElemento(self, forma):
-        raise NotImplementedError
-    def caminarAleatorio(self, bicho, forma):
-        raise NotImplementedError
-    def aceptar(self, unVisitor, forma):
-        raise NotImplementedError
-    def calcularPosicionDesde(self, forma):
-        raise NotImplementedError
+class Orientacion:
+
+    def caminar(self, unBicho):
+        pass
+
+    def ponerElemento(self, unEM, unContenedor):
+        pass
+
+    def obtenerElementoOrEn(self, unContenedor):
+        pass
+
+    def recorrer(self, unBloque, unContenedor):
+        pass
+
+    def calcularPosicionDesde(self, unaForma):
+        pass
 
 
 class Norte(Orientacion):
@@ -873,8 +1063,8 @@ class Norte(Orientacion):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def poner(self, elemento, contenedor):
-        contenedor.norte = elemento
+    def ponerElemento(self, unEM, unContenedor):
+        unContenedor.norte = unEM
 
     def recorrer(self, func, contenedor):
         if contenedor.norte is not None:
@@ -883,8 +1073,8 @@ class Norte(Orientacion):
     def __str__(self):
         return "Soy la orientacion norte"
 
-    def obtenerElemento(self, forma):
-        return forma.norte
+    def obtenerElementoOr(self, unContenedor):
+      return unContenedor.norte
 
     def caminarAleatorio(self, bicho, forma):
         forma.norte.entrar(bicho)
@@ -904,8 +1094,8 @@ class Oeste(Orientacion):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def poner(self, elemento, contenedor):
-        contenedor.oeste = elemento
+    def ponerElemento(self, unEM, unContenedor):
+        unContenedor.oeste = unEM
 
     def recorrer(self, func, contenedor):
         if contenedor.oeste is not None:
@@ -914,8 +1104,8 @@ class Oeste(Orientacion):
     def __str__(self):
         return "Soy la orientacion oeste"
 
-    def obtenerElemento(self, forma):
-        return forma.oeste
+    def obtenerElementoOr(self, unContenedor):
+      return unContenedor.oeste
 
     def caminarAleatorio(self, bicho, forma):
         forma.oeste.entrar(bicho)
@@ -935,8 +1125,8 @@ class Sur(Orientacion):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def poner(self, elemento, contenedor):
-        contenedor.sur = elemento
+    def ponerElemento(self, unEM, unContenedor):
+     unContenedor.sur = unEM
 
     def recorrer(self, func, contenedor):
         if contenedor.sur is not None:
@@ -945,14 +1135,15 @@ class Sur(Orientacion):
     def __str__(self):
         return "Soy la orientacion sur"
 
-    def obtenerElemento(self, forma):
-        return forma.sur
+    def obtenerElementoOr(self, unContenedor):
+     return unContenedor.sur
 
     def caminarAleatorio(self, bicho, forma):
         forma.sur.entrar(bicho)
 
     def aceptar(self, unVisitor, forma):
         forma.sur.aceptar(unVisitor)
+
     def calcularPosicionDesde(self, forma):
         unPunto=Point(forma.punto.x,forma.punto.y+1)
         forma.sur.calcularPosicionDesdeEn(forma,unPunto)
@@ -967,8 +1158,8 @@ class Este(Orientacion):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def poner(self, elemento, contenedor):
-        contenedor.este = elemento
+    def ponerElemento(self, unEM, unContenedor):
+        unContenedor.este = unEM     
 
     def recorrer(self, func, contenedor):
         if contenedor.este is not None:
@@ -977,8 +1168,8 @@ class Este(Orientacion):
     def __str__(self):
         return "Soy la orientacion este"
 
-    def obtenerElemento(self, forma):
-        return forma.este
+    def obtenerElementoOr(self, unContenedor):
+      return unContenedor.oeste
 
     def caminarAleatorio(self, bicho, forma):
         forma.este.entrar(bicho)
@@ -1107,52 +1298,88 @@ class Noroeste(Orientacion):
 
 
 class Creator:
-   #Clase creator de smalltalk
-   #Creamos paredes normales, puertas y bichos 
-    def fabricar_habitacion(self, num):
-        hab = Habitacion(num)
-       
-        hab.este = self.fabricar_pared()
-        hab.oeste = self.fabricar_pared()
-        hab.norte = self.fabricar_pared()
-        hab.sur = self.fabricar_pared()
-        return hab
 
-    def fabricar_juego(self):
-        return Juego()
+    def fabricarBichoAgresivo(self):
+        bicho = Bicho()
+        bicho.modo = Agresivo() 
+        bicho.vidas = 5
+        bicho.poder = 5
+        return bicho
     
-    def fabricar_laberinto(self):
-        return Laberinto()
+    def fabricarBichoAgresivoPos(self, posicion):
+        bicho = Bicho()
+        bicho.modo = Agresivo()
+        bicho.vidas = 5
+        bicho.poder = 5
+        bicho.posicion = posicion
+        return
     
-    def fabricar_pared(self):
+    def fabricarBichoPerezoso(self):
+        bicho = Bicho()
+        bicho.modo = Perezoso() 
+        bicho.vida = 1
+        bicho.poder = 1
+        return bicho
+    
+    def fabricarBichoPerezosoPos(self, posicion):
+        bicho = Bicho()
+        bicho.modo = Perezoso()
+        bicho.vida = 1
+        bicho.poder = 1
+        bicho.posicion = posicion
+        return
+    
+    def cambiarAModoAgresivo(self, bicho):
+        bicho.modo = Agresivo()
+        bicho.vida = 5
+        bicho.poder = 10
+
+    def cambiarAModoPerezoso(self, bicho):
+        bicho.modo = Perezoso()
+        bicho.vida = 1
+        bicho.poder = 1
+
+    def fabricarBomba(self):
+        return Bomba()
+    
+    def fabricarEste(self):
+        return Este()
+    
+    def fabricarOeste(self):
+        return Oeste()
+    
+    def fabricarNorte(self):
+        return Norte()
+    
+    def fabricarSur(self):
+        return Sur()
+    
+    def fabricarHabitacion(self, unNum):
+        hab = Habitacion()
+        hab.num= unNum
+        hab.agregarOrientacion(self.fabricarEste())
+        hab.agregarOrientacion(self.fabricarOeste())
+        hab.agregarOrientacion(self.fabricarNorte())
+        hab.agregarOrientacion(self.fabricarSur())
+        for each in hab.obtenerOrientaciones():
+            hab.ponerEnOr( each, self.fabricarPared())
+        return hab
+    
+    def fabricarPared(self):
         return Pared()
     
-    def fabricar_puerta(self, lado1, lado2):
-        return Puerta(lado1, lado2)
+    def fabricarPuerta(self):
+        return Puerta()
     
-   
-    def fabricar_bomba(self):
-       
-        return Bomba(None)
-
-   
-    def fabricar_bicho_agresivo(self):
-        bicho = Bicho()
-        bicho.ini_agresivo()
-        return bicho
+    def fabricarJuego(self):
+        return Juego()
     
-    def fabricar_bicho_perezoso(self):
-        bicho = Bicho()
-        bicho.ini_perezoso()
-        return bicho
-    
-    def cambiar_a_modo_agresivo(self, bicho):
-        bicho.ini_agresivo()
-
+    def fabricarLaberinto(self):
+        return Laberinto()
 
 class CreatorB(Creator):
    
-    def fabricar_pared(self):
+    def fabricarPared(self):
         return ParedBomba()
     
 
@@ -1194,3 +1421,232 @@ class VisitorInventario:
 
     def visitarHabitacion(self, habitacion):
         print(f"{habitacion} ha sido visitada por el inventario")
+
+
+
+class LaberintoBuilder:
+
+    def __init__(self):
+        self.laberinto = None
+        self.juego = None
+
+    def fabricarArmario(self, unNum, unContenedor):
+    
+
+        arm = Armario()
+        arm.num = unNum
+        arm.forma = self.fabricarForma()
+
+        for each in arm.obtenerOrientaciones():
+            arm.ponerEnOr(each, self.fabricarPared())
+
+        unContenedor.agregarHijo(arm)
+        return arm
+    
+    def fabricarBichoBoss(self, unaHab):
+     bicho=Bicho()
+     bicho.modo = BichoBoss()
+     bicho.posicion = unaHab
+     return bicho
+    
+    def fabricarBichoBossPos(self, unaHab):
+     bicho=Bicho()
+     bicho.modo = BichoBoss()
+     bicho.posicion = unaHab
+     return bicho
+
+    def fabricarBichoAgresivo(self):
+        bicho = Bicho()
+        bicho.modo = Agresivo()
+        bicho.vidas = 5
+        bicho.poder = 5
+        return bicho
+    
+    def fabricarBichoAgresivoPos(self, unaHab):
+        bicho = Bicho()
+        bicho.modo = Agresivo()
+        bicho.posicion = unaHab
+        bicho.vidas = 5
+        bicho.poder = 5
+        return bicho
+    
+    def fabricarBichoPerezoso(self):
+        bicho = Bicho()
+        bicho.modo = Perezoso()
+        bicho.vidas = 5
+        bicho.poder = 1
+        return bicho
+    
+    def fabricarBichoPerezosoPos(self, unaHab):
+        bicho = Bicho()
+        bicho.modo = Perezoso()
+        bicho.posicion = unaHab
+        bicho.vidas = 5
+        bicho.poder = 1
+        return bicho
+    
+    def fabricarBichoModo(self, strModo, unNum):
+    
+     
+        hab = self.juego.obtenerHabitacion(unNum)
+        bicho = getattr(self, f"fabricarBicho{strModo.capitalize()}")()
+        hab.entrar(bicho)
+        self.juego.agregarBicho(bicho)
+
+    def fabricarBombaEn(self, unContenedor):
+        bmb = Bomba()
+        unContenedor.agregarHijo(bmb)
+
+    def fabricarEste(self):
+        return Este()
+    
+    def fabricarNorte(self):
+        return Norte()
+    
+    def fabricarOeste(self):
+        return Oeste()
+    
+    def fabricarSur(self):
+        return Sur()
+    
+    
+    def fabricarForma(self):
+        forma = Cuadrado()
+        forma.agregarOrientacion(self.fabricarNorte())
+        forma.agregarOrientacion(self.fabricarEste())
+        forma.agregarOrientacion(self.fabricarSur())
+        forma.agregarOrientacion(self.fabricarOeste())
+        return forma
+    
+    def fabricarHabitacion(self, unNum):
+      hab = Habitacion()
+      hab.num = unNum
+      hab.forma = self.fabricarForma()
+      hab.forma.num = unNum
+
+      for each in hab.obtenerOrientaciones():
+        hab.ponerEnOr(each, self.fabricarPared())
+
+      self.laberinto.agregarHabitacion(hab)
+      return hab
+    
+    def fabricarJuego(self):
+        self.juego= Juego()
+        self.juego.prototipo = self.laberinto
+        self.juego.laberinto= self.juego.clonarLaberinto()
+
+    def fabricarLaberinto(self):
+           self.laberinto = Laberinto()
+
+    def fabricarPuertaL1(self, num1, strOr1, num2, strOr2):
+    
+        hab1 = self.laberinto.obtenerHabitacion(num1)
+        hab2 = self.laberinto.obtenerHabitacion(num2)
+
+        objOr1 = getattr(self, f"fabricar{strOr1.capitalize()}")()  # Ejemplo: fabricarNorte
+        objOr2 = getattr(self, f"fabricar{strOr2.capitalize()}")()
+
+        pt = Puerta()
+        pt.lado1 = hab1
+        pt.lado2 = hab2
+
+        hab1.ponerEnOr(objOr1, pt)
+        hab2.ponerEnOr(objOr2, pt)
+
+    def fabricarPared(self):
+        return Pared()
+
+    def fabricarTunelEn(self, unContenedor):
+        tunel = Tunel()
+        tunel.agregarComando(Entrar(receptor=tunel))
+        unContenedor.agregarHijo(tunel)
+
+    def obtenerJuego(self):
+        return self.juego
+
+
+
+class LaberintoBuilderRombo(LaberintoBuilder):
+   
+    def __init__(self):
+      super().__init__()
+   
+    def fabricarForma(self):
+     forma = Rombo()
+     forma.agregarOrientacion(self.fabricarNoroeste())
+     forma.agregarOrientacion(self.fabricarSuroeste())
+     forma.agregarOrientacion(self.fabricarSureste())
+     forma.agregarOrientacion(self.fabricarNoroeste())
+     return forma 
+
+class Director:
+
+    def __init__(self):
+        self.builder = None
+        self.dict = None
+
+    def fabricarBichos(self):
+        bichos = self.dict.get('bichos', None)
+        if bichos is None:
+            return  
+
+        for each in bichos:
+            self.builder.fabricarBichoModo(
+                each.get('modo'),  # Modo del bicho
+                each.get('posicion')  # Posición del bicho
+            )
+
+    def fabricarJuego(self):
+        self.builder.fabricarJuego()
+
+    def fabricarLaberinto(self):
+          self.builder.fabricarLaberinto()
+    # Recorrer la colección de habitaciones/armarios/etc.
+          laberinto = self.dict.get('laberinto', [])
+          for each in laberinto:
+           self.fabricarLaberintoRecursivo(each, 'root')
+    # Recorrer la colección de puertas para poner las puertas
+          puertas = self.dict.get('puertas', [])
+          for each in puertas:
+           self.builder.fabricarPuertaL1(each[0], each[1], each[2], each[3])
+
+    def fabricarLaberintoRecursivo(self, unDic, padre):
+      con = None
+    # Contenedores
+      if unDic.get('tipo') == 'habitacion':
+          con = self.builder.fabricarHabitacion(unDic.get('num'))
+      elif unDic.get('tipo') == 'armario':
+         con = self.builder.fabricarArmario(unDic.get('num'), padre)
+     # Hojas: hay que indicar el contenedor donde va la hoja
+      if unDic.get('tipo') == 'bomba':
+        self.builder.fabricarBombaEn(padre)
+      elif unDic.get('tipo') == 'tunel':
+        self.builder.fabricarTunelEn(padre)
+    # Recursividad para los hijos
+      hijos = unDic.get('hijos', None)
+      if hijos is not None:
+        for each in hijos:
+            self.fabricarLaberintoRecursivo(each, con)
+
+    def iniBuilder(self):
+
+        if self.dict.get('forma') == 'cuadrado':
+            self.builder = LaberintoBuilder()
+        elif self.dict.get('forma') == 'rombo':
+            self.builder = LaberintoBuilderRombo()
+       
+
+    def leerArchivo(self, unArchivoJSON):
+    
+        with open(unArchivoJSON, 'r') as readStream:
+            self.dict = json.load(readStream)
+
+    def obtenerJuego(self):
+        return self.builder.obtenerJuego()
+    
+    def procesar(self, unArchivoJSON):
+        self.leerArchivo(unArchivoJSON)
+        self.iniBuilder()
+        self.fabricarLaberinto()
+        self.fabricarJuego()
+        self.fabricarBichos()

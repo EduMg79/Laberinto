@@ -1,39 +1,52 @@
 # Importamos las clases necesarias
-from main import Juego, Creator, CreatorB
+from juego import Director, Juego, Creator, CreatorB,Arco
 
-# Crear una instancia de juego y un Creator por defecto
-juego = Juego()
-creator = Creator()
+def main():
 
-# Crear un laberinto con 2 habitaciones
-laberinto_simple = juego.crear_laberinto_2_habitaciones()
-print("Laberinto con 2 habitaciones")
-laberinto_simple.mostrar()
-print("Laberinto creado!")
+    arco= Arco()
+    director = Director()
+    director.procesar(ruta)
+    juego= director.obtenerJuego()
+    juego.agregarPersonaje("Joselu")
+    personaje=juego.person
+    personaje.poder = 2  # Asignamos un poder al personaje
+    juego.abrirPuertas()
+    juego.lanzarBichos()
+    b1=juego.bichos[0]
+    b2=juego.bichos[1]
+    b1.poder=10
+    juego.buscarBicho()
+    juego.buscarPersonaje(b1)
+    personaje.irAlSur()
+    personaje.irAlEste()
+    personaje.irAlNorte()
+    personaje.irAlOeste()
+    arco.usar(personaje)
+    personaje.atacar()
+    personaje.atacar()
+    juego.estanTodosLosBichosMuertos()
+    personaje.irAlSur()
+    personaje.atacar()
+    personaje.atacar()
+    personaje.atacar()
+    personaje.irAlNorte()
+    juego.buscarBicho()
+    juego.estanTodosLosBichosMuertos()
+    
 
-laberinto3=juego.crear_laberinto_2_habitaciones_fm(creator)
-print("Laberinto con 2 habitaciones usando Factory Method")
-laberinto3.mostrar()
-print("Laberinto creado!")
+   
 
-# Crear un laberinto con 4 habitaciones con bichos agresivos y perezosos
-laberinto2=juego.crear_laberinto_4_habitaciones()
-print("Laberinto con 4 habitaciones y bichos")
-laberinto2.mostrar()
-print("Laberinto creado!")
 
-# Crear un laberinto usando Factory Method para generar paredes bomba
-juego2 = Juego()
-creator_b = CreatorB()
-laberinto_bombas = juego2.crear_laberinto_2_habitaciones_fmd(creator_b)
-print("Laberinto con paredes bomba")
-laberinto_bombas.mostrar()
-print("Laberinto con paredes bomba listo!")
+    print(f"\nEstado del personaje:")
+    print(f"Nombre: {personaje.nombre}")
+    print(f"Vidas: {personaje.vidas}")
+    print(f"Poder: {getattr(personaje, 'poder', 1)}")
+    
+    print(f"Posición actual: Habitación {personaje.posicion.num}")
+ 
+   
 
-#creamos un laberinto con 4 habitaciones y bichos con fm
-juego3 = Juego()
-creator2 = Creator()
-laberinto_bichos = juego3.crear_laberinto_4_habitaciones_bichos_fm(creator2)
-print("Laberinto con 4 habitaciones y bichos con fm")
-laberinto_bichos.mostrar()
-print("Laberinto creado")
+
+if __name__ == "__main__":
+    ruta="C:\\Users\\Usuario\\Desktop\\3º\\lab2H1B.json"
+    main()
