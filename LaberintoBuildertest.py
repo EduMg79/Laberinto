@@ -24,7 +24,6 @@ class LaberintoBuilderTest(TestCase):
         nada = True
         con = None
 
-    # Contenedores
         if unDic.get('tipo') == 'habitacion':
             nada = False
             con = self.comprobarHabitacion(unDic.get('num'))
@@ -32,7 +31,6 @@ class LaberintoBuilderTest(TestCase):
             nada = False
             con = self.comprobarArmario(unDic.get('num'), padre)
 
-    # Hojas
         if unDic.get('tipo') == 'bomba':
             nada = False
             self.comprobarBomba(padre)

@@ -867,11 +867,7 @@ class Perezoso(Modo):
         return "Perezoso"
     
 class BichoBoss(Modo):
-    def __init__(self):
-        super().__init__()
-        self.modo = Agresivo()  # O el modo que prefieras
-        self.vidas = 200
-        self.poder = 10
+  
 
     def buscarTunelBicho(self, unBicho):
         pos = unBicho.posicion
@@ -879,8 +875,15 @@ class BichoBoss(Modo):
         if tunel is not None:
             tunel.entrar(unBicho)
 
+    def dormir(self, unBicho):
+        print(f"{unBicho} duerme")
+        time.sleep(3)
+
     def esBoss(self):
         return True
+    
+    def __init__(self):
+        super().__init__()
     
     def avisar(self,bicho):
         # Cuando el boss muere, el personaje gana la partida
