@@ -7,7 +7,7 @@ def main():
     juego = director.obtenerJuego()
 
     # Elige el tipo de personaje (puedes cambiar a Luchador() si quieres)
-    tipo = Mago()
+    tipo = Luchador()
     juego.agregarPersonaje("Joselu")
     personaje = juego.person
     personaje.tipo = tipo
@@ -17,11 +17,10 @@ def main():
 
     juego.abrirPuertas()
 
-    # Coloca al personaje en la habitación 3 (donde está el boss y el cofre)
+   
     personaje.irAlSureste()
 
-    # Abrir todas las puertas
-   
+    # Abrir todas las puertas print(f"\nEstado inicial: {personaje.nombre}, vidas: {personaje.vidas}, poder: {personaje.poder}")
       # Buscar y abrir el cofre
     cofre = next((h for h in personaje.posicion.hijos if hasattr(h, "es_cofre") and h.es_cofre()), None)
     if cofre:
@@ -42,10 +41,9 @@ def main():
         boss.posicion = personaje.posicion  # Asegura que el boss está en la misma habitación
         print("¡Combate contra el Boss!")
         while boss.estaVivo() and personaje.estaVivo():
-            personaje.atacar()
             personaje.esAtacadoPor(boss)  # El personaje ataca al boss (puedes cambiar el método si tienes uno específico)
-            if boss.estaVivo():
-                boss.esAtacadoPor(personaje)  # El boss ataca al personaje (puedes cambiar el método si tienes uno específico)
+            personaje.atacar()
+          
               
     else:
         print("No se encontró al boss.")
