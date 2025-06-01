@@ -252,6 +252,41 @@ class Laberinto(Contenedor):
     def __str__(self):
         return "Laberinto"
 
+class Cofre(Contenedor):
+    def __init__(self):
+        super().__init__()
+        self.objetos = [  Arco(),
+            Espada(),
+            PocionVida(),
+            Armadura(),
+            PocionVenenosa()]
+
+
+    def mostrarObjetos(self):
+        print("Objetos en el cofre:")
+        for i, obj in enumerate(self.objetos, 1):
+            print(f"{i}. {obj}")
+
+    def elegirObjeto(self, indice, personaje):
+        if 0 <= indice < len(self.objetos):
+            objeto = self.objetos.pop(indice)
+            print(f"{personaje.nombre} ha cogido {objeto} del cofre.")
+            personaje.inventario.agregar(objeto)
+        else:
+            print("Índice de objeto inválido.")
+
+    def es_cofre(self):
+        return True
+    
+    def esTunel(self):
+        return False
+    
+    def recorrer(self, unBloque):
+        unBloque(self)
+    
+    def __str__(self):
+     return "Cofre"
+    
 
 
 class Hoja(ElementoMapa):
@@ -401,7 +436,11 @@ class Ente:
     
     def heMuerto(self):
         self.estadoEnte = Muerto()
-        self.avisar()
+        # Si es boss, avisar con self
+        if  self.modo.esBoss():
+            self.modo.avisar(self)
+        else:
+            self.avisar()
 
     def __str__(self):
         return "Ente"
@@ -430,21 +469,46 @@ class Arma:
  
 
 class Arco(Arma):
- def usar(self, personaje):
-  personaje.poder += 3
-  print(f"{personaje.nombre} ha equipado un arco. Poder aumentado a {personaje.poder}")
+    def usar(self, personaje):
+        personaje.poder += 3
+        print(f"{personaje.nombre} ha equipado un arco. Poder aumentado a {personaje.poder}")
 
+    def __str__(self):
+        return "Arco"
 
 class Espada(Arma):
- def usar(self, personaje):
-  personaje.poder += 5
-  print(f"{personaje.nombre} ha equipado una espada. Poder aumentado a {personaje.poder}")
+    def usar(self, personaje):
+        personaje.poder += 5
+        print(f"{personaje.nombre} ha equipado una espada. Poder aumentado a {personaje.poder}")
 
+    def __str__(self):
+        return "Espada"
 
 class PocionVida(Arma):
- def usar(self, personaje):
-  personaje.vidas += 10
-  print(f"{personaje.nombre} ha usado una poción de vida. Vidas aumentadas a {personaje.vidas}")
+    def usar(self, personaje):
+        personaje.vidas += 10
+        print(f"{personaje.nombre} ha usado una poción de vida. Vidas aumentadas a {personaje.vidas}")
+
+    def __str__(self):
+        return "Poción de Vida"
+    
+class Armadura(Arma):
+    def usar(self, personaje):
+        personaje.vidas*=2
+        print(f"{personaje.nombre} ha equipado una armadura. Vidas aumentadas a {personaje.vidas}")
+
+    def __str__(self):
+        return "Armadura"
+    
+class PocionVenenosa(Arma):
+    def usar(self, personaje):
+        personaje.poder -= 5
+        personaje.vidas -= 5
+        print(f"{personaje.nombre} ha usado una poción venenosa. Vidas reducidas a {personaje.vidas}")
+
+    def __str__(self):
+        return "Poción de Vida"
+
 
 
 class Bicho(Ente):
@@ -484,6 +548,13 @@ class Bicho(Ente):
     def puedeAtacar(self):
         self.juego.buscarPersonaje(self)
 
+    def heMuerto(self):
+        self.estadoEnte = Muerto()
+        if hasattr(self.modo, "esBoss") and self.modo.esBoss():
+            self.modo.avisar(self)
+        else:
+            self.avisar()
+
     def __str__(self):
         return "Soy un bicho"+self.modo.__str__()
 
@@ -516,7 +587,7 @@ class Muerto(EstadoEnte):
         super().__init__()
 
     def vivir(self, ente):
-        print("El ente revive")
+        print("El ente vive")
         ente.estadoEnte = Vivo()
 
     def morir(self, ente):
@@ -650,6 +721,80 @@ class Rombo(Forma):
         self.sureste = None
         self.suroeste = None
 
+    def irAlNoreste(self, unEnte):
+        self.noreste.entrar(unEnte)
+
+    def irAlNoroeste(self, unEnte):
+        self.noroeste.entrar(unEnte)
+        
+    def irAlSureste(self, unEnte):
+        self.sureste.entrar(unEnte)
+
+    def irAlSur(self, unEnte):
+        self.sur.entrar(unEnte)
+
+    def irAlSuroeste(self, unEnte):
+        self.suroeste.entrar(unEnte)
+
+    def __str__(self):
+        return "Rombo"  
+
+
+class Hexagono(Forma):
+    def __init__(self):
+        super().__init__()
+        self.norte = None
+        self.noreste = None
+        self.sureste = None
+        self.sur = None
+        self.suroeste = None
+        self.noroeste = None
+
+    def irAlNorte(self, unEnte):
+        self.norte.entrar(unEnte)
+
+    def irAlNoreste(self, unEnte):
+        self.noreste.entrar(unEnte)
+
+    def irAlSureste(self, unEnte):
+        self.sureste.entrar(unEnte)
+
+    def irAlSur(self, unEnte):
+        self.sur.entrar(unEnte)
+
+    def irAlSuroeste(self, unEnte):
+        self.suroeste.entrar(unEnte)
+
+    def irAlNoroeste(self, unEnte):
+        self.noroeste.entrar(unEnte)
+
+    def __str__(self):
+        return "Hexágono"
+    
+class Triangulo(Forma):
+    def __init__(self):
+        super().__init__()
+        self.norte = None
+        self.sureste = None
+        self.suroeste = None
+
+    def irAlNorte(self, unEnte):
+        self.norte.entrar(unEnte)
+
+    def irAlSureste(self, unEnte):
+        self.sureste.entrar(unEnte)
+
+    def irAlSuroeste(self, unEnte):
+        self.suroeste.entrar(unEnte)
+
+    def __str__(self):
+        return "Triángulo"
+
+
+
+
+
+
 
 
 class Modo:
@@ -669,6 +814,9 @@ class Modo:
 
     def atacar(self, bicho):
         bicho.atacar()
+
+    def esBoss(self):
+        return False
 
     def __str__(self):
         return "Soy un modo"
@@ -724,6 +872,7 @@ class BichoBoss(Modo):
         self.modo = Agresivo()  # O el modo que prefieras
         self.vidas = 200
         self.poder = 10
+
     def buscarTunelBicho(self, unBicho):
         pos = unBicho.posicion
         tunel = next((each for each in pos.hijos if each.esTunel()), None)
@@ -733,14 +882,37 @@ class BichoBoss(Modo):
     def esBoss(self):
         return True
     
-    def avisar(self):
+    def avisar(self,bicho):
         # Cuando el boss muere, el personaje gana la partida
         print("¡Has derrotado al BOSS!")
-        if hasattr(self, 'juego'):
-            self.juego.ganaPersonaje()
+        if hasattr(bicho, 'juego'):
+            bicho.juego.ganaPersonaje()
 
     def __str__(self):
         return "Boss"
+    
+
+
+class Inventario:
+    def __init__(self):
+        self.objetos = []
+
+    def agregar(self, objeto):
+        self.objetos.append(objeto)
+        print(f"Objeto {objeto} añadido al inventario.")
+
+    def mostrar(self):
+        print("Inventario:")
+        for i, obj in enumerate(self.objetos, 1):
+            print(f"{i}. {obj}")
+
+    def usar(self, indice, personaje):
+        if 0 <= indice < len(self.objetos):
+            objeto = self.objetos.pop(indice)
+            print(f"Usando {objeto}...")
+            objeto.usar(personaje)
+        else:
+            print("Índice de objeto inválido.")
 
 class Juego:
 
@@ -751,10 +923,11 @@ class Juego:
         self.bichos.append(unBicho)
         unBicho.juego = self
 
-    def agregarPersonaje(self, unaCadena):
+    def agregarPersonaje(self, unaCadena,tipo=None):
         self.person= Personaje(unaCadena)
         self.person.juego = self
         self.laberinto.entrar(self.person)
+   
 
     def buscarBicho(self):
         posPerson = self.person.posicion
@@ -991,10 +1164,18 @@ class Juego:
 
 class Personaje(Ente):
 
-    def __init__(self,unaCadena):
+    def __init__(self,unaCadena,tipo=None):
         super().__init__()
-        self.vidas = 1000
+        self.vidas = 100
         self.nombre = unaCadena
+        self.inventario = Inventario()
+        self.tipo = tipo
+        if tipo is not None:
+            self.vidas = tipo.vidas
+            self.poder = tipo.poder
+        else:
+            self.vidas = 100
+            self.poder = 5
 
     def puedeAtacar(self):
         self.juego.buscarBicho()
@@ -1026,6 +1207,9 @@ class Personaje(Ente):
     def avisar(self):
         self.juego.muerePersonaje()
 
+    def heMuerto(self):
+        print(f"Fin del juego, {self.nombre} ha perdido.")
+
     def crearNuevoLaberinto(self,unTunel):
         unTunel.crearNuevoLaberinto(self)
 
@@ -1036,6 +1220,27 @@ class Personaje(Ente):
 
     def __str__(self):
         return f"Personaje {self.nombre}"
+
+class TipoPersonaje:
+    def __init__(self, vidas, poder):
+        self.vidas = vidas
+        self.poder = poder
+
+class Luchador(TipoPersonaje):
+    def __init__(self):
+        super().__init__(vidas=50, poder=10)
+    def __str__(self):
+        return "Luchador"
+    
+
+class Mago(TipoPersonaje):
+    def __init__(self):
+        super().__init__(vidas=30, poder=20)
+    def __str__(self):
+        return "Mago"
+
+  
+    
 
 class Orientacion:
 
@@ -1457,10 +1662,11 @@ class LaberintoBuilder:
         unContenedor.agregarHijo(arm)
         return arm
     
-    def fabricarBichoBoss(self, unaHab):
+    def fabricarBichoBoss(self):
      bicho=Bicho()
      bicho.modo = BichoBoss()
-     bicho.posicion = unaHab
+     bicho.vidas = 50  # O el valor que quieras para el boss
+     bicho.poder = 10 
      return bicho
     
     def fabricarBichoBossPos(self, unaHab):
@@ -1578,7 +1784,9 @@ class LaberintoBuilder:
     def obtenerJuego(self):
         return self.juego
 
-
+    def fabricarCofreEn(self, unContenedor):
+     cofre = Cofre()
+     unContenedor.agregarHijo(cofre)
 
 class LaberintoBuilderRombo(LaberintoBuilder):
    
@@ -1592,7 +1800,58 @@ class LaberintoBuilderRombo(LaberintoBuilder):
      forma.agregarOrientacion(self.fabricarSureste())
      forma.agregarOrientacion(self.fabricarNoroeste())
      return forma 
+    
+    def fabricarNoroeste(self):
+        return Noroeste()
+    def fabricarSuroeste(self):
+        return Suroeste()
+    def fabricarSureste(self):
+        return Sureste()
+    def fabricarNoreste(self):
+        return Noreste()
+    
 
+
+class LaberintoBuilderHexagono(LaberintoBuilder):
+    def fabricarForma(self):
+        forma = Hexagono()
+        forma.agregarOrientacion(self.fabricarNorte())
+        forma.agregarOrientacion(self.fabricarNoreste())
+        forma.agregarOrientacion(self.fabricarSureste())
+        forma.agregarOrientacion(self.fabricarSur())
+        forma.agregarOrientacion(self.fabricarSuroeste())
+        forma.agregarOrientacion(self.fabricarNoroeste())
+        return forma
+
+    def fabricarNoreste(self):
+        return Noreste()
+
+    def fabricarSureste(self):
+        return Sureste()
+
+    def fabricarSuroeste(self):
+        return Suroeste()
+
+    def fabricarNoroeste(self):
+        return Noroeste()
+
+class LaberintoBuilderTriangulo(LaberintoBuilder):
+    def fabricarForma(self):
+        forma = Triangulo()
+        forma.agregarOrientacion(self.fabricarNorte())
+        forma.agregarOrientacion(self.fabricarSureste())
+        forma.agregarOrientacion(self.fabricarSuroeste())
+        return forma
+
+    def fabricarSureste(self):
+        return Sureste()
+
+    def fabricarSuroeste(self):
+        return Suroeste()
+    
+    def fabricarNorte(self):
+        return Norte()
+    
 class Director:
 
     def __init__(self):
@@ -1636,6 +1895,8 @@ class Director:
         self.builder.fabricarBombaEn(padre)
       elif unDic.get('tipo') == 'tunel':
         self.builder.fabricarTunelEn(padre)
+      elif unDic.get('tipo') == 'cofre':
+        self.builder.fabricarCofreEn(padre)
     # Recursividad para los hijos
       hijos = unDic.get('hijos', None)
       if hijos is not None:
@@ -1648,6 +1909,10 @@ class Director:
             self.builder = LaberintoBuilder()
         elif self.dict.get('forma') == 'rombo':
             self.builder = LaberintoBuilderRombo()
+        elif self.dict.get('forma') == 'hexagono':
+         self.builder = LaberintoBuilderHexagono()
+        elif self.dict.get('forma') == 'triangulo':
+           self.builder = LaberintoBuilderTriangulo()
        
 
     def leerArchivo(self, unArchivoJSON):

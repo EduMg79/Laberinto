@@ -83,7 +83,7 @@ class LaberintoBuilderTest(TestCase):
         self.director.procesar(ruta)
         self.dict = self.director.dict
         self.juego = self.director.obtenerJuego()
-        self.juego.agregarPersonaje('Surmania')
+        self.juego.agregarPersonaje('Joselu')
 
     def testBichoAtaca(self):
     

@@ -1,52 +1,44 @@
-# Importamos las clases necesarias
-from juego import Director, Juego, Creator, CreatorB,Arco
+from juego import Director, Mago, Luchador, PocionVenenosa
 
 def main():
-
-    arco= Arco()
     director = Director()
+    ruta = "C:\\Users\\Usuario\\Desktop\\Git\\PruebaJsonPersonajePierde"
     director.procesar(ruta)
-    juego= director.obtenerJuego()
+    juego = director.obtenerJuego()
+    pocion=PocionVenenosa()
+
+    # Elige el tipo de personaje (puedes cambiar a Luchador() si quieres)
+    tipo = Luchador()  # Menos vidas y poder para perder más fácil
     juego.agregarPersonaje("Joselu")
-    personaje=juego.person
-    personaje.poder = 2  # Asignamos un poder al personaje
+    personaje = juego.person
+    personaje.tipo = tipo
+    personaje.vidas = tipo.vidas
+    personaje.poder = tipo.poder
+    personaje.inventario.agregar(pocion) 
+    personaje.inventario.mostrar()
+    personaje.inventario.usar(0, personaje)
+
+
     juego.abrirPuertas()
-    juego.lanzarBichos()
-    b1=juego.bichos[0]
-    b2=juego.bichos[1]
-    b1.poder=10
-    juego.buscarBicho()
-    juego.buscarPersonaje(b1)
-    personaje.irAlSur()
+
+    # Coloca al personaje en la habitación 1 (donde hay bichos y bomba)
     personaje.irAlEste()
-    personaje.irAlNorte()
-    personaje.irAlOeste()
-    arco.usar(personaje)
-    personaje.atacar()
-    personaje.atacar()
-    juego.estanTodosLosBichosMuertos()
-    personaje.irAlSur()
-    personaje.atacar()
-    personaje.atacar()
-    personaje.atacar()
-    personaje.irAlNorte()
-    juego.buscarBicho()
-    juego.estanTodosLosBichosMuertos()
     
 
-   
+    print(f"Estado inicial: {personaje.nombre}, vidas: {personaje.vidas}, poder: {personaje.poder}")
 
+    while personaje.estaVivo():
+     for bicho in juego.bichos:
+        bicho.posicion = personaje.posicion  # Asegura que todos están en la misma habitación
+        print(f"{bicho} ataca a {personaje.nombre}")
+        personaje.esAtacadoPor(bicho)
+        personaje.atacar()
+        if  personaje.vidas<=0:
+            print(f"{personaje.nombre} ha muerto.")
+            break
 
-    print(f"\nEstado del personaje:")
-    print(f"Nombre: {personaje.nombre}")
-    print(f"Vidas: {personaje.vidas}")
-    print(f"Poder: {getattr(personaje, 'poder', 1)}")
-    
-    print(f"Posición actual: Habitación {personaje.posicion.num}")
  
-   
-
-
+        
+    print(f"Fin del juego, {personaje.nombre} ha perdido.")
 if __name__ == "__main__":
-    ruta="C:\\Users\\Usuario\\Desktop\\3º\\lab2H1B.json"
     main()
